@@ -1,0 +1,20 @@
+{
+    "name": "course-hero/gaufrette-extras",
+    "description": "Adds additional adapters and functionality to gaufrette",
+    "license": "Apache-2",
+    "authors": [
+        {
+            "name": "Jason Wentworth",
+            "email": "jwentworth@coursehero.com"
+        }
+    ],
+    "require": {
+        "knplabs/gaufrette": "0.2.*@dev"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4"
+    },
+    "autoload": {
+        "psr-0": { "CourseHero\\GaufretteExtras": "src/" }
+    }
+}
