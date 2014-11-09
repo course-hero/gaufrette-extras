@@ -11,8 +11,7 @@ use Gaufrette\Adapter\InMemory as InMemoryAdapter;
  * All writes will happen against the primary.
  *
  * All reads will attempt to read against the primary, if the key is not found
- * the read will then happen against the fallback. If the key is found in the
- * fallback, the data will then be copied to the primary.
+ * the read will then happen against the fallback.
  *
  * @package CourseHero\GaufretteExtras
  * @author  Jason Wentworth <wentwj@gmail.com>
@@ -48,7 +47,6 @@ class ReadthroughAdapter implements Adapter,
             $contents = $this->primary->read($key);
         } else{
             $contents = $this->fallback->read($key);
-            $this->primary->write($key, $contents);
         }
         return $contents;
     }
@@ -99,7 +97,11 @@ class ReadthroughAdapter implements Adapter,
      */
     public function setMetadata($key, $metadata)
     {
-        if ($this->primary instanceof MetadataSupporter) {
+        if ($this->primary instanceof Adapter\MetadataSupporter) {
+            if (!$this->primary->exists($key) && $this->fallback->exists($key)){
+                $this->primary->write($key, $this->fallback->read($key));
+            }
+
             $this->primary->setMetadata($key, $metadata);
         }
     }
@@ -108,10 +110,15 @@ class ReadthroughAdapter implements Adapter,
      */
     public function getMetadata($key)
     {
-        if ($this->primary instanceof MetadataSupporter) {
-            return $this->primary->getMetadata($key);
+        $result = false;
+        if ($this->primary instanceof Adapter\MetadataSupporter) {
+            if ($this->primary->exists($key)) {
+                $result = $this->primary->getMetadata($key);
+            } else if ($this->fallback instanceof Adapter\MetadataSupporter){
+                $result = $this->fallback->getMetadata($key);
+            }
         }
-        return false;
+        return $result;
     }
 
     /**
