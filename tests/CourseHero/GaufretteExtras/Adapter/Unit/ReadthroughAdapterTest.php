@@ -64,13 +64,13 @@ class ReadthroughAdapterTest extends \PHPUnit_Framework_TestCase
         $primaryMetadata = array("data" => "primary");
         $fallbackMetadata = array("data" => "fallback");
 
-        return [
+        return array(
             //primaryMetadata, fallbackMetadata, expectedMetadata, message
-            [null, $fallbackMetadata, $fallbackMetadata, "should get fallback metadata with no primary"],
-            [$primaryMetadata, $fallbackMetadata, $primaryMetadata, "should get primary metadata over fallback"],
-            [$primaryMetadata, null, $primaryMetadata, "should get primary metadata with no fallback"],
-            [null, null, null, "should have no metadata if nothing has metadata"]
-        ];
+            array(null, $fallbackMetadata, $fallbackMetadata, "should get fallback metadata with no primary"),
+            array($primaryMetadata, $fallbackMetadata, $primaryMetadata, "should get primary metadata over fallback"),
+            array($primaryMetadata, null, $primaryMetadata, "should get primary metadata with no fallback"),
+            array(null, null, null, "should have no metadata if nothing has metadata")
+        );
     }
 
     public function testShouldGetFalseForMetadataIfNotProvider(){
@@ -160,12 +160,12 @@ class ReadthroughAdapterTest extends \PHPUnit_Framework_TestCase
     }
 
     public function shouldDetermineIfDirectoryData(){
-        return [
+        return array(
             //isPrimary, isFallback, expected, message
-            [false, false, false, 'should not be a directory if not a directory anywhere'],
-            [true, false, true, 'should be a directory if primary is a directory'],
-            [false, true, true, 'should be a directory if fallback is a directory'],
-            [true, true, true, 'should be a directory if everywhere is a directory']
-        ];
+            array(false, false, false, 'should not be a directory if not a directory anywhere'),
+            array(true, false, true, 'should be a directory if primary is a directory'),
+            array(false, true, true, 'should be a directory if fallback is a directory'),
+            array(true, true, true, 'should be a directory if everywhere is a directory')
+        );
     }
 }
