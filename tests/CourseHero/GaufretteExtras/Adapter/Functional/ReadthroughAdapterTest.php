@@ -34,7 +34,7 @@ class ReadthroughAdapterTest extends FunctionalTestCase
     /**
      * @test
      */
-    public function shouldReadFromFallbackIntoPrimary(){
+    public function shouldReadFromFallback(){
         $key = "test-file";
         $contents = "abc123";
 
@@ -43,7 +43,5 @@ class ReadthroughAdapterTest extends FunctionalTestCase
         $result = $this->filesystem->read($key);
 
         $this->assertEquals($contents, $result, "should return contents from fallback");
-
-        $this->assertEquals($contents, $this->primary->read($key), "should copy contents to primary on cache miss read");
     }
 }
