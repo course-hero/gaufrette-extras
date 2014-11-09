@@ -1,5 +1,6 @@
 ## generic files to ignore
 *~
+*.lock
 .DS_Store
 .DS_Store?
 *.swp
@@ -12,6 +13,7 @@ ehthumbs.db
 Thumbs.db
 
 ## composer related
+composer.lock
 /vendor/
 composer.phar
 
