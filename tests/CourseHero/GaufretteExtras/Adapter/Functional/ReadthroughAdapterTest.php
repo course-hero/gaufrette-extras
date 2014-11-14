@@ -44,4 +44,36 @@ class ReadthroughAdapterTest extends FunctionalTestCase
 
         $this->assertEquals($contents, $result, "should return contents from fallback");
     }
+    
+    /**
+     * @test
+     */
+    public function shouldWriteToFallbackOnFillOnMiss(){
+        $key = "test-file";
+        $contents = "abc123";
+        
+        $this->readthroughAdapter = new ReadthroughAdapter($this->primary, $this->fallback, true);
+        $this->fallback->write($key, $contents);
+        
+        $this->readthroughAdapter->read($key);
+        
+        $this->assertTrue($this->primary->exists($key), "primary should have read file");
+        $this->assertEquals($contents, $this->primary->read($key), "primary file should match fallback file");
+    }
+    
+    /**
+     * @test
+     */
+    public function shouldNotWriteToFallbackOnFillOnMiss(){
+        $key = "test-file";
+        $contents = "abc123";
+        
+        $this->readthroughAdapter = new ReadthroughAdapter($this->primary, $this->fallback, true);
+        $this->fallback->write($key, $contents);
+        
+        $this->readthroughAdapter->read($key);
+        
+        $this->assertTrue($this->primary->exists($key), "primary should not have copy of read file");
+        $this->assertEquals($contents, $this->primary->read($key), "primary file should match fallback file");
+    }
 }

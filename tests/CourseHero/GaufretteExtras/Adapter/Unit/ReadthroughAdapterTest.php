@@ -106,6 +106,39 @@ class ReadthroughAdapterTest extends \PHPUnit_Framework_TestCase
 
         $this->readthroughAdapter->setMetadata($key, $metadata);
     }
+    
+    public function testShouldCopyDataOnFillOnMiss(){
+        $this->readthroughAdapter = new ReadthroughAdapter($this->primary, $this->fallback, true);
+        
+        $key = "test-file";
+        $content = "content";
+        $metadata = array("data" => "something");
+
+        $this->primary->expects($this->atLeastOnce())
+            ->method('exists')
+            ->with($key)
+            ->willReturn(false);
+
+        $this->fallback->expects($this->once())
+                       ->method('read')
+                       ->with($key)
+                       ->willReturn($content);
+        
+        $this->fallback->expects($this->once())
+                      ->method('getMetadata')
+                      ->with($key)
+                      ->willReturn($metadata);
+
+        $this->primary->expects($this->once())
+                      ->method('write')
+                      ->with($key, $content);
+
+        $this->primary->expects($this->once())
+                      ->method('setMetadata')
+                      ->with($key, $metadata);
+
+        $this->readthroughAdapter->read($key);
+    }
 
     public function testShouldCopyDataOnMetadataSetInPrimary(){
         $key = "test-file";

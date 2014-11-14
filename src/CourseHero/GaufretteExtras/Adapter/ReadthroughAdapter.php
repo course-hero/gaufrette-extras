@@ -23,21 +23,31 @@ class ReadthroughAdapter implements Adapter,
      * @var Adapter
      */
     protected $fallback;
+
     /**
      * @var Adapter
      */
     protected $primary;
+    
+    /**
+     * @var bool
+     */
+    protected $fillOnMiss;
+
     /**
      * Constructor
      *
      * @param Adapter $primary          The adapter to attempt to use first, all writes use this adapater
      * @param Adapter $fallback         The adapter to use as a fallback if data isn't present in the primary adapter
+     * @param bool $fillOnMiss          Whether or not to fill the primary adapter if the file is not present in it on a read
      */
-    public function __construct(Adapter $primary, Adapter $fallback)
+    public function __construct(Adapter $primary, Adapter $fallback, $fillOnMiss = false)
     {
         $this->fallback = $fallback;
         $this->primary = $primary;
+        $this->fillOnMiss = $fillOnMiss;
     }
+
     /**
      * {@InheritDoc}
      */
@@ -47,9 +57,14 @@ class ReadthroughAdapter implements Adapter,
             $contents = $this->primary->read($key);
         } else{
             $contents = $this->fallback->read($key);
+            
+            if ($contents && $this->fillOnMiss){
+                $this->writeContentToPrimary($key, $contents);
+            }
         }
         return $contents;
     }
+
     /**
      * {@inheritDoc}
      */
@@ -57,6 +72,7 @@ class ReadthroughAdapter implements Adapter,
     {
         return $this->primary->rename($key, $new);
     }
+
     /**
      * {@inheritDoc}
      */
@@ -64,6 +80,7 @@ class ReadthroughAdapter implements Adapter,
     {
         return $this->primary->write($key, $content);
     }
+
     /**
      * {@inheritDoc}
      */
@@ -71,6 +88,7 @@ class ReadthroughAdapter implements Adapter,
     {
         return $this->primary->exists($key) || $this->fallback->exists($key);
     }
+
     /**
      * {@inheritDoc}
      */
@@ -78,6 +96,7 @@ class ReadthroughAdapter implements Adapter,
     {
         return array_merge($this->primary->keys(), $this->fallback->keys());
     }
+
     /**
      * {@inheritDoc}
      */
@@ -85,6 +104,7 @@ class ReadthroughAdapter implements Adapter,
     {
         return $this->primary->delete($key);
     }
+
     /**
      * {@inheritDoc}
      */
@@ -92,6 +112,7 @@ class ReadthroughAdapter implements Adapter,
     {
         return $this->primary->isDirectory($key) || $this->fallback->isDirectory($key);
     }
+
     /**
      * {@inheritDoc}
      */
@@ -105,6 +126,7 @@ class ReadthroughAdapter implements Adapter,
             $this->primary->setMetadata($key, $metadata);
         }
     }
+
     /**
      * {@inheritDoc}
      */
@@ -127,5 +149,17 @@ class ReadthroughAdapter implements Adapter,
     public function mtime($key)
     {
         return $this->primary->mtime($key);
+    }
+    
+    /**
+     * Write content to the primary adapter from the fallback
+     */
+    protected function writeContentToPrimary($key, $contents){
+        $this->primary->write($key, $contents);
+
+        if ($this->primary instanceof Adapter\MetadataSupporter 
+            && $this->fallback instanceof Adapter\MetadataSupporter){
+            $this->primary->setMetadata($key, $this->fallback->getMetadata($key));
+        }
     }
 }
